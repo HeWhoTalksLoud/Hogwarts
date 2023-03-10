@@ -9,6 +9,6 @@ public interface HouseService {
     Faculty getFaculty(Long id);
     List<Faculty> getAllFaculties();
     Faculty editFaculty(Faculty faculty);
-    Faculty deleteFaculty(Long id);
+    void deleteFaculty(Long id);
     List<Faculty> getFacultiesByColor(String color);
 }
