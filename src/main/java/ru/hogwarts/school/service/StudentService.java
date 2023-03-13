@@ -9,6 +9,6 @@ public interface StudentService {
     Student getStudent(Long id);
     List<Student> getAllStudents();
     Student editStudent(Student student);
-    Student deleteStudent(Long id);
+    void deleteStudent(Long id);
     List<Student> getStudentsByAge(Integer age);
 }
