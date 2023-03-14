@@ -3,7 +3,9 @@ package ru.hogwarts.school.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.dto.FacultyDto;
+import ru.hogwarts.school.dto.StudentDto;
+import ru.hogwarts.school.service.HouseService;
 import ru.hogwarts.school.service.StudentService;
 
 import java.util.List;
@@ -12,38 +14,55 @@ import java.util.List;
 @RequestMapping("/student")
 public class StudentController {
     private final StudentService studentService;
+    private final HouseService houseService;
 
-    public StudentController(StudentService studentService) {
+    public StudentController(StudentService studentService, HouseService houseService) {
         this.studentService = studentService;
+        this.houseService = houseService;
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Student>> showAllStudents(@RequestParam(name = "age", required = false) String age) {
-        List<Student> students;
+    public ResponseEntity<List<StudentDto>> showAllStudents(@RequestParam(name = "age", required = false) Integer age) {
+        List<StudentDto> students;
         if (age == null) {
             students = studentService.getAllStudents();
         } else {
-            students = studentService.getStudentsByAge(Integer.parseInt(age));
+            students = studentService.getStudentsByAge(age);
         }
         if (students.isEmpty()) return ResponseEntity.notFound().build();
         else return ResponseEntity.ok(students);
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<Student> showStudent(@PathVariable String id) {
-        Student student = studentService.getStudent(Long.parseLong(id));
+    ResponseEntity<StudentDto> showStudent(@PathVariable Long id) {
+        StudentDto student = studentService.getStudent(id);
         if (student == null) return ResponseEntity.notFound().build();
         else return ResponseEntity.ok(student);
     }
 
+    @GetMapping("/{id}/faculty")
+    ResponseEntity<FacultyDto> getFaculty(@PathVariable Long id) {
+        FacultyDto facultyDto = houseService.findByStudentsId(id);
+        if (facultyDto == null) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok(facultyDto);
+    }
+
+    @GetMapping("/age")
+    public ResponseEntity<List<StudentDto>> findByAge(@RequestParam(name = "minAge") Integer minAge,
+                                                      @RequestParam(name = "maxAge") Integer maxAge) {
+        List<StudentDto> studentDtos = studentService.findByAgeBetween(minAge, maxAge);
+        if (studentDtos.isEmpty()) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok(studentDtos);
+    }
+
     @PostMapping("")
-    public Student addStudent(@RequestBody Student student) {
+    public StudentDto addStudent(@RequestBody StudentDto student) {
         return studentService.addStudent(student);
     }
 
     @PutMapping("")
-    public ResponseEntity<Student> editStudent(@RequestBody Student student) {
-        Student editedStudent = studentService.editStudent(student);
+    public ResponseEntity<StudentDto> editStudent(@RequestBody StudentDto student) {
+        StudentDto editedStudent = studentService.editStudent(student);
         if (editedStudent == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } else {
