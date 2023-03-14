@@ -3,7 +3,8 @@ package ru.hogwarts.school.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.hogwarts.school.model.Faculty;
+import ru.hogwarts.school.dto.FacultyDto;
+import ru.hogwarts.school.dto.StudentDto;
 import ru.hogwarts.school.service.HouseService;
 
 import java.util.List;
@@ -18,32 +19,47 @@ public class HouseController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Faculty>> showAllFacultys(@RequestParam(name = "color", required = false) String color) {
-        List<Faculty> faculties;
+    public ResponseEntity<List<FacultyDto>> showAllFaculties(@RequestParam(name = "color", required = false) String color) {
+        List<FacultyDto> facultyDtos;
         if (color == null) {
-            faculties = houseService.getAllFaculties();
+            facultyDtos = houseService.getAllFaculties();
         } else {
-            faculties = houseService.getFacultiesByColor(color);
+            facultyDtos = houseService.getFacultiesByColor(color);
         }
-        if (faculties.isEmpty()) return ResponseEntity.notFound().build();
-        else return ResponseEntity.ok(faculties);
+        if (facultyDtos.isEmpty()) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok(facultyDtos);
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<Faculty> showFaculty(@PathVariable String id) {
-        Faculty student = houseService.getFaculty(Long.parseLong(id));
-        if (student == null) return ResponseEntity.notFound().build();
-        else return ResponseEntity.ok(student);
+    ResponseEntity<FacultyDto> showFaculty(@PathVariable Long id) {
+        FacultyDto facultyDto = houseService.getFaculty(id);
+        if (facultyDto == null) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok(facultyDto);
     }
 
+    @GetMapping("/{id}/students")
+    ResponseEntity<List<StudentDto>> getStudents(@PathVariable Long id) {
+        List<StudentDto> studentDtos = houseService.getStudents(id);
+        if (studentDtos.isEmpty()) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok(studentDtos);
+    }
+
+    @GetMapping("/search/{name}")
+    ResponseEntity<List<FacultyDto>> findByNameIgnoreCase(@PathVariable String name) {
+        List<FacultyDto> facultyDtos = houseService.findByNameIgnoreCase(name);
+        if (facultyDtos.isEmpty()) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok(facultyDtos);
+    }
+
+
     @PostMapping("")
-    public Faculty addFaculty(@RequestBody Faculty student) {
-        return houseService.addFaculty(student);
+    public FacultyDto addFaculty(@RequestBody FacultyDto facultyDto) {
+        return houseService.addFaculty(facultyDto);
     }
 
     @PutMapping("")
-    public ResponseEntity<Faculty> editFaculty(@RequestBody Faculty student) {
-        Faculty editedFaculty = houseService.editFaculty(student);
+    public ResponseEntity<FacultyDto> editFaculty(@RequestBody FacultyDto facultyDto) {
+        FacultyDto editedFaculty = houseService.editFaculty(facultyDto);
         if (editedFaculty == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } else {
